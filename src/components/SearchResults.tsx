@@ -9,9 +9,10 @@ interface SearchResult {
 interface SearchResultsProps {
   results: SearchResult[];
   isLoading: boolean;
+  onVisitSite: (url: string) => void;
 }
 
-const SearchResults = ({ results, isLoading }: SearchResultsProps) => {
+const SearchResults = ({ results, isLoading, onVisitSite }: SearchResultsProps) => {
   if (isLoading) {
     return (
       <div className="mt-8 space-y-4">
@@ -36,16 +37,14 @@ const SearchResults = ({ results, isLoading }: SearchResultsProps) => {
           transition={{ duration: 0.3, delay: index * 0.1 }}
           className="result-appear"
         >
-          <a
-            href={result.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block rounded-lg p-4 transition-all hover:bg-gray-50"
+          <button
+            onClick={() => onVisitSite(result.url)}
+            className="block w-full text-left rounded-lg p-4 transition-all hover:bg-gray-50"
           >
             <h3 className="text-lg font-medium text-primary">{result.title}</h3>
             <p className="mt-1 text-sm text-muted-foreground">{result.url}</p>
             <p className="mt-2 text-sm text-gray-600">{result.description}</p>
-          </a>
+          </button>
         </motion.div>
       ))}
     </div>
