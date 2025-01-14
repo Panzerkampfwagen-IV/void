@@ -2,7 +2,7 @@
 
 ## Project info
 
-[**URL**] (htts://preview--the-void.lovable.app)
+**URL**: [link](htts://preview--the-void.lovable.app)
 
 ## How can I edit this code?
 
