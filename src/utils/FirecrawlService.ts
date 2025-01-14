@@ -18,7 +18,7 @@ interface CrawlStatusResponse {
 type CrawlResponse = CrawlStatusResponse | ErrorResponse;
 
 export class FirecrawlService {
-  private static API_KEY_STORAGE_KEY = 'firecrawl_api_key';
+  private static API_KEY_STORAGE_KEY = 'fc-62fd2a51dd8f48f8b26796d9f46cd4d3';
   private static firecrawlApp: FirecrawlApp | null = null;
 
   static saveApiKey(apiKey: string): void {
