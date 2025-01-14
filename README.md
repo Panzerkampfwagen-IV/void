@@ -13,3 +13,5 @@ This project is built with .
 - React
 - shadcn-ui
 - Tailwind CSS
+
+![alt text](http://url/to/img.png)
