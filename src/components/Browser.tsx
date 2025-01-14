@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Bookmark, Clock, ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast";
 import SearchBar from './SearchBar';
 import SearchResults from './SearchResults';
 import { cn } from '@/lib/utils';
+import { FirecrawlService } from '@/utils/FirecrawlService';
 
 interface Bookmark {
   id: string;
@@ -11,9 +13,11 @@ interface Bookmark {
 }
 
 const Browser = () => {
+  const { toast } = useToast();
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [currentUrl, setCurrentUrl] = useState('');
+  const [emulatedContent, setEmulatedContent] = useState<string | null>(null);
   const [bookmarks] = useState<Bookmark[]>([
     { id: '1', title: 'Example Bookmark', url: 'https://example.com' },
   ]);
@@ -44,10 +48,44 @@ const Browser = () => {
     setIsSearching(false);
   };
 
-  const handleVisitSite = (url: string) => {
+  const handleVisitSite = async (url: string) => {
+    setIsSearching(true);
+    setEmulatedContent(null);
+    
     // Ensure URL has protocol
     const formattedUrl = url.startsWith('http') ? url : `https://${url}`;
     setCurrentUrl(formattedUrl);
+
+    try {
+      const result = await FirecrawlService.crawlWebsite(formattedUrl);
+      
+      if (result.success && result.data) {
+        const htmlContent = result.data.data?.[0]?.html;
+        if (htmlContent) {
+          setEmulatedContent(htmlContent);
+        } else {
+          toast({
+            title: "Error",
+            description: "No content found from the website",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: result.error || "Failed to load website",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load website",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (
@@ -76,11 +114,16 @@ const Browser = () => {
         <main className="py-12">
           {currentUrl ? (
             <div className="w-full h-[80vh] rounded-lg overflow-hidden border border-gray-200 bg-white">
-              <iframe
-                src={currentUrl}
-                className="w-full h-full"
-                title="Browser Content"
-              />
+              {emulatedContent ? (
+                <div 
+                  className="w-full h-full overflow-auto p-4"
+                  dangerouslySetInnerHTML={{ __html: emulatedContent }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900" />
+                </div>
+              )}
             </div>
           ) : (
             <div className={cn(
