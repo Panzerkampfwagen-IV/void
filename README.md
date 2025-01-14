@@ -1,4 +1,4 @@
-#Welcome to the Goddamn void
+# Welcome to the Goddamn Void
 
 ## Project info
 
