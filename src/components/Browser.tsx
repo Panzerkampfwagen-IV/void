@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Bookmark, Clock, ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import SearchBar from './SearchBar';
 import SearchResults from './SearchResults';
 import { cn } from '@/lib/utils';
@@ -18,9 +20,36 @@ const Browser = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [currentUrl, setCurrentUrl] = useState('');
   const [emulatedContent, setEmulatedContent] = useState<string | null>(null);
+  const [apiKey, setApiKey] = useState('');
   const [bookmarks] = useState<Bookmark[]>([
     { id: '1', title: 'Example Bookmark', url: 'https://example.com' },
   ]);
+
+  const handleApiKeySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const isValid = await FirecrawlService.testApiKey(apiKey);
+      if (isValid) {
+        FirecrawlService.saveApiKey(apiKey);
+        toast({
+          title: "Success",
+          description: "API key saved successfully",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Invalid API key",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to validate API key",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSearch = async (query: string) => {
     setIsSearching(true);
@@ -49,6 +78,15 @@ const Browser = () => {
   };
 
   const handleVisitSite = async (url: string) => {
+    if (!FirecrawlService.getApiKey()) {
+      toast({
+        title: "Error",
+        description: "Please set your API key first",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSearching(true);
     setEmulatedContent(null);
     
@@ -112,6 +150,25 @@ const Browser = () => {
         </header>
 
         <main className="py-12">
+          {!FirecrawlService.getApiKey() && (
+            <form onSubmit={handleApiKeySubmit} className="mb-8 space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="apiKey" className="text-sm font-medium text-gray-700">
+                  Enter your Firecrawl API Key
+                </label>
+                <Input
+                  id="apiKey"
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="Enter your API key"
+                  className="max-w-md"
+                />
+              </div>
+              <Button type="submit">Save API Key</Button>
+            </form>
+          )}
+
           {currentUrl ? (
             <div className="w-full h-[80vh] rounded-lg overflow-hidden border border-gray-200 bg-white">
               {emulatedContent ? (
